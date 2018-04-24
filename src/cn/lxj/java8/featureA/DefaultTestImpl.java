@@ -1,4 +1,4 @@
-package cn.lxj.java8.featureOne;
+package cn.lxj.java8.featureA;
 
 /**
  * DefaultTestImpl  接口中静态方法不会被实现和继承，default方法可以实现也可以不用实现

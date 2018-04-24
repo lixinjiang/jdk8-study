@@ -1,4 +1,4 @@
-package cn.lxj.java8.featureOne;
+package cn.lxj.java8.featureA;
 
 /**
  * DefalutTest 接口的默认方法
@@ -11,7 +11,8 @@ public interface DefalutTest {
     default void defaultMethod(){
         System.out.println("DefaultTest default method");
     }
-    
+
+    // final静态变量
     static int a = 5;
     
     int sub(int a, int b);

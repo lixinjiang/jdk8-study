@@ -1,4 +1,4 @@
-package cn.lxj.java8.featureOne;
+package cn.lxj.java8.featureA;
 
 /**
  * 示例
