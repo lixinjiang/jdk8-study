@@ -1,12 +1,13 @@
 package cn.lxj.java8.featureH;
 
+import cn.lxj.java8.common.CartManager;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -123,7 +124,7 @@ public class MainTestStream {
      * 对一个Stream进行截断操作，获取其前N个元素，如果原Stream中包含的元素个数小于N，那就获取其所有的元素；
      */
     @Test
-    public void testStreamLimit(){
+    public void testStreamLimit() {
         Stream<String> integerStream = Stream.of("1", "2", "3", "5");
         integerStream.limit(6).forEach(System.out::println);
     }
@@ -132,8 +133,117 @@ public class MainTestStream {
      * 返回一个丢弃原Stream的前N个元素后剩下元素组成的新Stream，如果原Stream中包含的元素个数小于N，那么返回空Stream；
      */
     @Test
-    public void testStreamSkip(){
-        Stream<Integer> integerStream = Stream.of(1,24,45,54,6,4,1,0);
+    public void testStreamSkip() {
+        Stream<Integer> integerStream = Stream.of(1, 24, 45, 54, 6, 4, 1, 0);
 //        integerStream.skip(3).forEach();
     }
+
+    static List<String> stringCollection;
+
+    static {
+        stringCollection = new ArrayList<String>();
+        stringCollection.add("a14");
+        stringCollection.add("5");
+        stringCollection.add("a43");
+        stringCollection.add("89");
+        stringCollection.add("b64");
+        stringCollection.add("112");
+        stringCollection.add("55");
+        stringCollection.add("a55");
+        stringCollection.add("58");
+    }
+
+    /**
+     * match匹配
+     */
+    @Test
+    public void testStreamMatch() {
+        boolean anyStartsWithA =
+                stringCollection
+                        .stream()
+                        .anyMatch((s) -> s.startsWith("a"));
+        System.out.println(anyStartsWithA);
+        boolean allStartsWithA =
+                stringCollection
+                        .stream()
+                        .allMatch((s) -> s.startsWith("a"));
+        System.out.println(allStartsWithA);
+        boolean noneStartsWithZ =
+                stringCollection
+                        .stream()
+                        .noneMatch((s) -> s.startsWith("z"));
+        System.out.println(noneStartsWithZ);      // true
+    }
+
+    /**
+     * count 计数
+     * 计数是一个最终操作，返回stream中元素的个数，返回值类型是long
+     */
+    @Test
+    public void testStreamCount() {
+        long startsWithB = stringCollection.stream().filter((s) -> s.startsWith("b")).count();
+        System.out.println(startsWithB); // 1
+    }
+
+    /**
+     * Reduce规约
+     * 这是一个最终操作，允许通过指定的函数来将stream中的多个元素规约为一个元素
+     * 规约后的结果是通过Optionl接口表示的
+     */
+    @Test
+    public void testStreamReduce() {
+        Optional<String> reduced = stringCollection.stream().sorted().reduce((s1, s2) -> s1 + "#" + s2);
+        reduced.ifPresent(System.out::println);
+    }
+
+    /**
+     * map类型支持stream，不过map提供了一些新的有用的方法来处理一些日常任务
+     */
+    @Test
+    public void testStreamMap() {
+        Map<Integer, String> map = new HashMap<>();
+        for (int i = 0; i < 10; i++) {
+            map.putIfAbsent(i, "val " + i);
+        }
+        map.forEach((id, val) -> System.out.println(val));
+        System.out.println("华丽的分隔符*********************");
+//    以上代码很容易理解， putIfAbsent 不需要我们做额外的存在性检查，而forEach则接收一个Consumer接口来对map里的每一个键值对进行操作。
+//    下面的例子展示了map上的其他有用的函数：
+        map.computeIfPresent(3, (num, val) -> val + num);
+        map.get(3); // val33
+        map.computeIfPresent(9, (num, val) -> null);
+        map.containsKey(9); // false
+        map.computeIfAbsent(23, num -> "val" + num);
+        map.containsKey("23");  // true
+        map.computeIfAbsent(3, num -> "bam");
+        map.get(3); // val33
+//      在map内删除一个键值全都匹配的项：
+        map.remove(3, "val3");
+        map.get(3); // val33
+        map.remove(3, "val33");
+        map.get(3); // null
+//      另外一个有用的方法
+        map.getOrDefault(42, "not found");   // not found
+//      对map的元素做合并也变得容易
+        map.merge(9, "val19", (value, newValue) -> value.concat(newValue));
+        map.get(9); // val9
+        map.merge(9, "concat", (value, newValue) -> value.concat(newValue));
+        map.get(9); // val9concat
+//        Merge做的事情是如果键名不存在则插入，否则则对原键对应的值做合并操作并重新插入到map中。
+//        steam在实际项目中使用的代码片段：
+        List<CartManager> cars = new ArrayList<CartManager>();
+        cars.add(new CartManager(UUID.fromString("cart1").toString()));
+        cars.add(new CartManager(UUID.fromString("cart2").toString()));
+        cars.add(new CartManager(UUID.fromString("cart3").toString()));
+
+        //1、由list集合生成以productId为key值的map集合
+        Map<String, List<CartManager>> cartManagerGroup = cars.stream().collect(Collectors.groupingBy
+                (CartManager::getProductId));
+
+        //2、取得购物车中数量之和
+        IntStream is = cars.stream().mapToInt((CartManager c) -> c.getQuantity());
+
+    }
+
+
 }
