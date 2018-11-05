@@ -5,7 +5,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 
 /**
- * FooV2
+ * FooV1
  * description TODO
  * create class by lxj 2018/10/29
  **/
